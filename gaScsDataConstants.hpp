@@ -125,8 +125,20 @@ namespace gaScsData {
   const long OFFSET_AWH1= 207;
   const long OFFSET_AWH2= 247;
   const long OFFSET_AWH3= 327;  // TODO: confirm
-  const long OFFSET_LANDING_ROLLER= 760;
+  
+  // Landing roller move events are based on the landed turn, but the coil map
+  // angles are based on the CLS and 0U roller. These offsets are necessary to
+  // make the landing roller events to coincide with when the coil map angles 
+  // are being landed.
+  // Post CSM1 Update: Use the below offsets. Now there are two LR locations
+  // const long OFFSET_LANDING_ROLLER= 760;   
+  const long LR_ODD_LAYER_OFFSET= 660;  // Lr -> 40  Deg
+  const long LR_ODD_LAYER_TURN= 8;      // Lr -> 40  Deg on this turn 
+  const long LR_EVEN_LAYER_OFFSET= 820; // Lr -> 200 Deg
+  const long LR_EVEN_LAYER_TURN= 7;     // Lr -> 200 Deg on this turn
+
   const long OFFSET_LANDED_TURN= 960;
+  
   const long OFFSET_FIDUCIAL_LASER= 1005;
 
   const long ANGLE_OFFSET_SMALL= 8;   // degrees
@@ -136,6 +148,7 @@ namespace gaScsData {
   const long CONSOLIDATION_INTERVAL= 120; // how often to make an odd layer consolidation event
 
   const long FIDUCIAL_LASER_EVENT_LOCAL_OFFSET= 65;
+
 
   // list of layer numbers where coil measurement and compression take place
   // mnockup
@@ -149,10 +162,11 @@ namespace gaScsData {
   const size_t NUM_OF_LA_ME_CO = sizeof(LA_ME_CO) / sizeof(LA_ME_CO[0]);
 // db constants
   // test db
-//  const std::string DB_SERVER_NAME= "VMUSERHOST\\STN06DEVTEST1"; 
+  const std::string DB_SERVER_NAME= "VMUSERHOST\\STN06DEVTEST1"; 
+  const std::string DB_DATABASE_NAME= "gaStn06_PostCsm1Test";
   // real ows db
-  const std::string DB_SERVER_NAME= "10.6.1.10";
-  const std::string DB_DATABASE_NAME= "gaStn06";
+  // const std::string DB_SERVER_NAME= "10.6.1.10";
+  // const std::string DB_DATABASE_NAME= "gaStn06";
   const std::string DB_USER_NAME= "ScsStn06";
   const std::string DB_PASSWORD= "scswrapperstn06";
 
