@@ -75,8 +75,8 @@ public:
                       EID_TURN_MEASUREMENT = 1021,
                       EID_MOVE_ECHAIN = 1022,  // Move FO E-chain and increment layer
                       EID_LONG_LEAD_ENDGAME = 1023,  // long lead end game and RIA disassembly
-                      EID_MOVE_LR_TO_40DEG = 1025, // added event not in original list
-                      EID_MOVE_LR_TO_200DEG = 1026}; // added event not in original list
+                      EID_MOVE_LR_TO_INNER_TURN_POS = 1025, // added event not in original list
+                      EID_MOVE_LR_TO_OUTER_TURN_POS = 1026}; // added event not in original list
 
      // constants
 
@@ -109,8 +109,8 @@ public:
       bool isEventTurnMeasurement(CoilMap::cm_cit cit) const;
       bool isEventMoveEChain(CoilMap::cm_cit cit) const;
       bool isEventLeadEndgame(CoilMap::cm_cit cit) const;
-      bool isEventMoveLrTo40Deg(CoilMap::cm_cit cit) const;
-      bool isEventMoveLrTo200Deg(CoilMap::cm_cit cit) const;
+      bool isEventMoveLrInnerTurnPos(CoilMap::cm_cit cit) const;
+      bool isEventMoveLrToOuterTurnPos(CoilMap::cm_cit cit) const;
 
       // add the specified event ID to the event map at the specified angle
       void AddEventToMap(double angle, long eventId, std::string logicTrace = "");

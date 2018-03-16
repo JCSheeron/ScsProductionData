@@ -131,23 +131,37 @@ namespace gaScsData {
   // make the landing roller events to coincide with when the coil map angles 
   // are being landed.
   // Post CSM1 Update: Use the below offsets. Now there are two LR locations
-  // const long OFFSET_LANDING_ROLLER= 760;   
-  const long LR_ODD_LAYER_OFFSET= 660;  // Lr -> 40  Deg
-  const long LR_ODD_LAYER_TURN= 8;      // Lr -> 40  Deg on this turn 
-  const long LR_EVEN_LAYER_OFFSET= 820; // Lr -> 200 Deg
-  const long LR_EVEN_LAYER_TURN= 7;     // Lr -> 200 Deg on this turn
+  // due to the stiffness differences between inner and outer turns.  The 
+  // inner turns (more stiff) use the original location (40 degrees), and the
+  // outer turns (less stiff) use a new location (200 degrees). As the wrapping 
+  // heads progress, they go *decreasingly* thru RIA angles, so they pass the 
+  // 200 degree location *before* the 40 degree location, so the wrapping heads
+  // get to the LR (an RIA feature) at 200 degrees sooner than they would get 
+  // to the LR if the LR was at 40 degree position.
+  // const long OFFSET_LANDING_ROLLER= 760; // original LR location  
+  // When to move LR to inner turn
+  const long LR_MV_TO_INNER_TURN_OFFSET= 560; // LR in outer turn pos before the move
+  // Where LR is while landing inner turns
+  const long LR_INNER_TURN_OFFSET= 760;
+  // When to move LR to outer turn
+  const long LR_MV_TO_OUTER_TURN_OFFSET= 760; // LR in inner turn pos before the move
+  // Where LR is while landing outer turns
+  const long LR_OUTER_TURN_OFFSET= 560;
+  const long LR_MV_TO_INNER_TURN= 8;      // Lr -> inner (40 Deg) on this turn 
+  const long LR_MV_TO_OUTER_TURN= 7;     // Lr -> outer (200 Deg) on this turn
+  // The layer ends when the LR gets to within this many degrees of the joggle.
+  const long END_LAYER_LR_JOGGLE_NOM_OFFSET= 100;
 
   const long OFFSET_LANDED_TURN= 960;
   
   const long OFFSET_FIDUCIAL_LASER= 1005;
+  const long FIDUCIAL_LASER_EVENT_LOCAL_OFFSET= 65;
 
-  const long ANGLE_OFFSET_SMALL= 8;   // degrees
+  const long ANGLE_OFFSET_SMALL= 8; // degrees. Used to move events (usually a bit earlier) than exact calc angles.
   const long ANGLE_OFFSET_LARGE= 30;   // degrees
   const long ANGLE_OFFSET_CE= 5;  // degree offset used in consolidation event angle calc
 
   const long CONSOLIDATION_INTERVAL= 120; // how often to make an odd layer consolidation event
-
-  const long FIDUCIAL_LASER_EVENT_LOCAL_OFFSET= 65;
 
 
   // list of layer numbers where coil measurement and compression take place

@@ -182,6 +182,8 @@ namespace gaScsData {
     return FC_JOGGLE == fcPair.first && FC_LOCAL != fcPair.second && LAYERS_PER_COIL - 1 != layerCheck;
     } // EventMap::isEventLayerIncrement(CoilMap::cm_cit cit)
 
+  // When the even layer is ending, the odd layer is at the 0U, so the
+  // check for ending an even layer is if the 0U is at an odd layer joggle 
   bool EventMap::isEventEndEvenLayer(CoilMap::cm_cit cit) const {
     bool fcJ = (FC_JOGGLE == coilMap_.GetFc(cit) ? true : false); // is joggle
     bool oddLayer = (1 == coilMap_.GetLayer(cit) % 2 ? true : false); // is layer odd?
@@ -234,6 +236,8 @@ namespace gaScsData {
     return (FC_INLET == fc || FC_OUTLET == fc);
     } // EventMap::isEventOpenLandingRoller(CoilMap::cm_cit cit)
 
+  // When the odd layer is ending, the even layer is at the 0U, so the 
+  // check for ending an odd layer is if the 0U is at an even layer joggle, 
   bool EventMap::isEventEndOddLayer(CoilMap::cm_cit cit) const {
     bool fcJ = (FC_JOGGLE == coilMap_.GetFc(cit) ? true : false); // is joggle
     bool evenLayer = (0 == coilMap_.GetLayer(cit) % 2 ? true : false); // is layer even?
@@ -244,8 +248,8 @@ namespace gaScsData {
   bool EventMap::isEventLayerCompression(CoilMap::cm_cit cit) const {
     bool fcJ = (FC_JOGGLE == coilMap_.GetFc(cit) ? true : false); // is joggle
     long layerCheck= coilMap_.GetLayer(cit); // get layer
-    bool isCorrectLayer = coilMap_.isInLaMeCo(layerCheck);  // is this layer in the list of layes where coil compression happens
-    // Joggle and correct layer
+    // is this layer in the list of layes where coil compression happens
+    bool isCorrectLayer = coilMap_.isInLaMeCo(layerCheck);      // Joggle and correct layer
     return fcJ && isCorrectLayer;
     } // EventMap::isEventLayerCompression(CoilMap::cm_cit cit)
 
@@ -272,21 +276,23 @@ namespace gaScsData {
     return fcW && LAYERS_PER_COIL == layerCheck;
     } // EventMap::isEventLeadEndgame(CoilMap::cm_cit cit)
 
-  // Landing roller moves to 40 degree position on turn 8 of odd layers
-  bool EventMap::isEventMoveLrTo40Deg(CoilMap::cm_cit cit) const {
+  // Landing roller moves to 40 degree position for inner turns (on the "move to inner" turn).
+  // This happens when wrapping from outer turns in, which happens on odd turns.
+  bool EventMap::isEventMoveLrInnerTurnPos(CoilMap::cm_cit cit) const {
     bool oddLayer = (1 == coilMap_.GetLayer(cit) % 2 ? true : false); // is layer odd?
     long turnCheck= coilMap_.GetTurn(cit); // get turn
     // odd layer and correct turn
-    return oddLayer && LR_ODD_LAYER_TURN == turnCheck;
-    } // EventMap::isEventMoveLrTo40Deg(CoilMap::cm_cit cit)
+    return oddLayer && LR_MV_TO_INNER_TURN == turnCheck;
+    } // EventMap::isEventMoveLrInnerTurnPos(CoilMap::cm_cit cit)
 
-  // Landing roller moves to 200 degree position on turn 7 of even layers
-  bool EventMap::isEventMoveLrTo200Deg(CoilMap::cm_cit cit) const {
+  // Landing roller moves to 200 degree position for outer turns (on the "move to outer" turn).
+  // This happens when wrapping from inner turns out, which happens on even turns.
+  bool EventMap::isEventMoveLrToOuterTurnPos(CoilMap::cm_cit cit) const {
     bool evenLayer = (0 == coilMap_.GetLayer(cit) % 2 ? true : false); // is layer even?
     long turnCheck= coilMap_.GetTurn(cit); // get turn
     // even layer and correct turn
-    return evenLayer && LR_EVEN_LAYER_TURN == turnCheck;
-    } // EventMap::isEventMoveLrTo200Deg(CoilMap::cm_cit cit)
+    return evenLayer && LR_MV_TO_OUTER_TURN == turnCheck;
+    } // EventMap::isEventMoveLrToOuterTurnPos(CoilMap::cm_cit cit)
 
 
   // add the specified event ID to the event map at the specified angle
@@ -414,8 +420,8 @@ namespace gaScsData {
       // is teach fiducial laser position event needed
       eNeeded= isEventTeachFiducial(cicm); // need to add to map if true
       if (eNeeded) {
-        // calc angle = current angle + fiducial laser event offset from local zero
-        eventAngle = coilMap_.GetAngle(cicm) + FIDUCIAL_LASER_EVENT_LOCAL_OFFSET;
+        // calc angle = current angle + fiducial laser event offset + offset from local zero
+        eventAngle = coilMap_.GetAngle(cicm) + OFFSET_FIDUCIAL_LASER + FIDUCIAL_LASER_EVENT_LOCAL_OFFSET;
         // add event to map
         logicTrace = "";
         AddEventToMap(eventAngle, EID_TEACH_FIDUCIAL, logicTrace);
@@ -434,39 +440,41 @@ namespace gaScsData {
         AddEventToMap(eventAngle, EID_REMOVE_PLOW, logicTrace);
         } // event needed
       
-      // Move landing roller events. Moving on an odd layer to 40 Deg
-      // Manually added part way thru CSM1 and now being added here.
-      // See if an odd layer move to 40Deg is needed
-      eNeeded = isEventMoveLrTo40Deg(cicm); // need to add to map if true
+      // Move landing roller events. 
+      // See if move to the inner turn position (40 deg) is needed, 
+      // and add it if necessary.
+      eNeeded = isEventMoveLrInnerTurnPos(cicm); // need to add to map if true
       if (eNeeded) {
         // calc angle = current angle + LR Odd layer offset
-        eventAngle = coilMap_.GetAngle(cicm) + LR_ODD_LAYER_OFFSET;
+        eventAngle = coilMap_.GetAngle(cicm) + LR_MV_TO_INNER_TURN_OFFSET;
         logicTrace = "";
-        AddEventToMap(eventAngle, EID_MOVE_LR_TO_40DEG, logicTrace);
+        AddEventToMap(eventAngle, EID_MOVE_LR_TO_INNER_TURN_POS, logicTrace);
         }
 
-      // See if an even layer move to 200Deg is needed
-      eNeeded = isEventMoveLrTo200Deg(cicm); // need to add to map if true
+      // See if move to the outer turn position (2000 deg) is needed, 
+      // and add it if necessary.
+      eNeeded = isEventMoveLrToOuterTurnPos(cicm); // need to add to map if true
       if (eNeeded) {
         // calc angle = current angle + LR Even layer offset
-        eventAngle = coilMap_.GetAngle(cicm) + LR_EVEN_LAYER_OFFSET;
+        eventAngle = coilMap_.GetAngle(cicm) + LR_MV_TO_OUTER_TURN_OFFSET;
         logicTrace = "";
-        AddEventToMap(eventAngle, EID_MOVE_LR_TO_200DEG, logicTrace);
+        AddEventToMap(eventAngle, EID_MOVE_LR_TO_OUTER_TURN_POS, logicTrace);
         }
 
       // Post-Mockup Update: Make compression, turn measure, and He Measure
       // Coincident with end of layer events.
       // is end of odd layer needed
       // Post-CSM1 Update: Make end of layer events use the now dynamic landing
-      // roller offsets.  On odd layers, the landing roller will be in the 40
-      // degree position, so use the 40 degree offset.  On even layers, the
-      // landing roller will be in the 200 degree location, so use the 200
-      // degree offset.
+      // roller offsets.  On odd layers, the landing roller will set for inner
+      // turns (the 40 degree position), so use the LR inner turn offset.
+      // On even layers, the landing roller will be set for outer turns (the
+      // 200 degree location), so use the LR outer turn offset.
+      // End the layer before the LR gets to the joggle by the end of layer LR
+      // joggle offset.
       eNeeded = isEventEndOddLayer(cicm); // need to add to map if true
       if (eNeeded) {
-        // calc angle = current angle + landing roller offset - small offset
-        // eventAngle = coilMap_.GetAngle(cicm) + OFFSET_LANDING_ROLLER - ANGLE_OFFSET_SMALL;
-        eventAngle = coilMap_.GetAngle(cicm) + LR_ODD_LAYER_OFFSET - ANGLE_OFFSET_SMALL;
+        // calc angle = current angle + landing roller offset - joggle offset
+        eventAngle = coilMap_.GetAngle(cicm) + LR_INNER_TURN_OFFSET - END_LAYER_LR_JOGGLE_NOM_OFFSET;
         // add end of layer event to map
         logicTrace = "";
         AddEventToMap(eventAngle, EID_END_ODD_LAYER, logicTrace);
@@ -505,9 +513,8 @@ namespace gaScsData {
 		  // is end of even layer event
 	    eNeeded = isEventEndEvenLayer(cicm); // need to add to map if true
 	    if (eNeeded) {
-		    // calc angle = current angle + landing roller offset - small offset
-		    // eventAngle = coilMap_.GetAngle(cicm) + OFFSET_LANDING_ROLLER - ANGLE_OFFSET_SMALL;
-		    eventAngle = coilMap_.GetAngle(cicm) + LR_EVEN_LAYER_OFFSET - ANGLE_OFFSET_SMALL;
+        // calc angle = current angle + landing roller offset - joggle offset
+		    eventAngle = coilMap_.GetAngle(cicm) + LR_OUTER_TURN_OFFSET - END_LAYER_LR_JOGGLE_NOM_OFFSET;
 		    // add end of layer event to map
         logicTrace = "";
         AddEventToMap(eventAngle, EID_END_EVEN_LAYER, logicTrace);
@@ -543,41 +550,6 @@ namespace gaScsData {
 
       } // end of even layer event needed
 
-      /*****
-      * Post-Mockup Update: Make compression, turn measure, and He Measure coincident wtih 
-      * end of layer events.  Do this by making the checks from within the end of layer events.
-      * leave the discrete (seperate) checks below, but comment them out to support future changes
-     
-      // is compression measurement layer
-      eNeeded = isEventLayerCompression(cicm); // need to add to map if true
-      if (eNeeded) {
-        // calc angle = current angle + landed turn offset - small offset
-        eventAngle = coilMap_.GetAngle(cicm) + OFFSET_LANDED_TURN - ANGLE_OFFSET_SMALL;
-        // add event to map
-        logicTrace = "";
-        AddEventToMap(eventAngle, EID_LAYER_COMPRESSION, logicTrace);
-      } // event needed
-
-      // is measurement layer
-      eNeeded = isEventTurnMeasurement(cicm); // need to add to map if true
-      if (eNeeded) {
-        // calc angle = current angle + landed turn offset - small offset
-        eventAngle = coilMap_.GetAngle(cicm) + OFFSET_LANDED_TURN - ANGLE_OFFSET_SMALL;
-        // add event to map
-        logicTrace = "";
-        AddEventToMap(eventAngle, EID_TURN_MEASUREMENT, logicTrace);
-      } // event needed
-
-      // is He pipe measurment needed
-      eNeeded = isEventHePipeMeasure(cicm); // need to add to map if true
-      if (eNeeded) {
-        // calc angle = current angle + landed turn offset
-        eventAngle = coilMap_.GetAngle(cicm) + OFFSET_LANDED_TURN;
-        // add event to map
-        logicTrace = "";
-        AddEventToMap(eventAngle, EID_HE_PIPE_MEASURE, logicTrace);
-        } // event needed
-      *****/
 
 	  	// is He pipe insulation needed
       eNeeded= isEventHePipeInsulation(cicm); // need to add to map if true
@@ -591,16 +563,18 @@ namespace gaScsData {
 
       // is Landing Roller open needed.
       // Post CSM1 Update: LR is now has two different locations based on even
-      // or odd layers.  
+      // or odd layers. The LR gets opened because there is a He Inlet or Outlet. 
+      // These He pipes are only on inner most or outer most turns, so we can 
+      // safely use the LR inner offset on odd layers, and the LR outer offset
+      // on even layers.
       eNeeded= isEventOpenLandingRoller(cicm); // need to add to map if true
       if (eNeeded) {
         // calc angle = current angle + landing roller offset - small offset
-        // eventAngle= coilMap_.GetAngle(cicm) + OFFSET_LANDING_ROLLER - ANGLE_OFFSET_SMALL;
         bool oddLayer = (1 == coilMap_.GetLayer(cicm) % 2 ? true : false); // is layer odd?
         if (oddLayer) 
-          eventAngle= coilMap_.GetAngle(cicm) + LR_ODD_LAYER_OFFSET - ANGLE_OFFSET_SMALL;
+          eventAngle= coilMap_.GetAngle(cicm) + LR_INNER_TURN_OFFSET - ANGLE_OFFSET_SMALL;
         else
-          eventAngle= coilMap_.GetAngle(cicm) + LR_EVEN_LAYER_OFFSET - ANGLE_OFFSET_SMALL;
+          eventAngle= coilMap_.GetAngle(cicm) + LR_OUTER_TURN_OFFSET - ANGLE_OFFSET_SMALL;
 
         // add event to map
         logicTrace = "";
