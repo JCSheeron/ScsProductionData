@@ -451,7 +451,7 @@ namespace gaScsData {
         AddEventToMap(eventAngle, EID_MOVE_LR_TO_INNER_TURN_POS, logicTrace);
         }
 
-      // See if move to the outer turn position (2000 deg) is needed, 
+      // See if move to the outer turn position (200 deg) is needed, 
       // and add it if necessary.
       eNeeded = isEventMoveLrToOuterTurnPos(cicm); // need to add to map if true
       if (eNeeded) {
@@ -476,7 +476,7 @@ namespace gaScsData {
         // calc angle = current angle + landing roller offset - joggle offset
         eventAngle = coilMap_.GetAngle(cicm) + LR_INNER_TURN_OFFSET - END_LAYER_LR_JOGGLE_NOM_OFFSET;
         // add end of layer event to map
-        logicTrace = "";
+        logicTrace = "Used LR inner turn offset";
         AddEventToMap(eventAngle, EID_END_ODD_LAYER, logicTrace);
 
         // see if a compression event is needed
@@ -516,7 +516,7 @@ namespace gaScsData {
         // calc angle = current angle + landing roller offset - joggle offset
 		    eventAngle = coilMap_.GetAngle(cicm) + LR_OUTER_TURN_OFFSET - END_LAYER_LR_JOGGLE_NOM_OFFSET;
 		    // add end of layer event to map
-        logicTrace = "";
+        logicTrace = "Used LR outer turn offset";
         AddEventToMap(eventAngle, EID_END_EVEN_LAYER, logicTrace);
 
         // see if a compression event is needed
@@ -564,20 +564,27 @@ namespace gaScsData {
       // is Landing Roller open needed.
       // Post CSM1 Update: LR is now has two different locations based on even
       // or odd layers. The LR gets opened because there is a He Inlet or Outlet. 
-      // These He pipes are only on inner most or outer most turns, so we can 
-      // safely use the LR inner offset on odd layers, and the LR outer offset
-      // on even layers.
+      // These He pipes are only on inner most or outer most turns, but in the
+      // coil map, inlets and outlets are right before or after joggles,
+      // throwing off the even/odd layer determination. Instead use the turn number
+      // of the inlet/outlet. This won't increment on an inlet/outlet, because they
+      // have a row in the coil map distinct from a joggle. If the turn number is 
+      // small, use the LR offset for inner turns, if the turn number is big, 
+      // use the LR offset for outer turns.
       eNeeded= isEventOpenLandingRoller(cicm); // need to add to map if true
       if (eNeeded) {
         // calc angle = current angle + landing roller offset - small offset
-        bool oddLayer = (1 == coilMap_.GetLayer(cicm) % 2 ? true : false); // is layer odd?
-        if (oddLayer) 
-          eventAngle= coilMap_.GetAngle(cicm) + LR_INNER_TURN_OFFSET - ANGLE_OFFSET_SMALL;
-        else
+        // Determine which LR offset to use by looking  at the turn number
+        long turn= coilMap_.GetTurn(cicm);
+        if (turn <= LR_MV_TO_OUTER_TURN) { // outer turn 
           eventAngle= coilMap_.GetAngle(cicm) + LR_OUTER_TURN_OFFSET - ANGLE_OFFSET_SMALL;
-
+          logicTrace = "Used LR outer turn offset";
+          }
+        else {// inner turn
+          eventAngle= coilMap_.GetAngle(cicm) + LR_INNER_TURN_OFFSET - ANGLE_OFFSET_SMALL;
+          logicTrace = "Used LR inner turn offset";
+          }
         // add event to map
-        logicTrace = "";
         AddEventToMap(eventAngle, EID_OPEN_LANDING_ROLLER, logicTrace);
         } // event needed
 
