@@ -154,7 +154,8 @@ namespace gaScsData {
 
   const long OFFSET_LANDED_TURN= 960;
   
-  const long OFFSET_FIDUCIAL_LASER= 1005;
+  // const long OFFSET_FIDUCIAL_LASER= 1005;
+  const long OFFSET_FIDUCIAL_LASER= 660;
   const long FIDUCIAL_LASER_EVENT_LOCAL_OFFSET= 65;
 
   const long ANGLE_OFFSET_SMALL= 8; // degrees. Used to move events (usually a bit earlier) than exact calc angles.
@@ -176,11 +177,11 @@ namespace gaScsData {
   const size_t NUM_OF_LA_ME_CO = sizeof(LA_ME_CO) / sizeof(LA_ME_CO[0]);
 // db constants
   // test db
-  const std::string DB_SERVER_NAME= "VMUSERHOST\\STN06DEVTEST1"; 
-  const std::string DB_DATABASE_NAME= "gaStn06_Csm2Test";
+  // const std::string DB_SERVER_NAME= "VMUSERHOST\\STN06DEVTEST1"; 
+  // const std::string DB_DATABASE_NAME= "gaStn06_Csm2Test";
   // real ows db
-  // const std::string DB_SERVER_NAME= "10.6.1.10";
-  //const std::string DB_DATABASE_NAME= "gaStn06";
+  const std::string DB_SERVER_NAME= "10.6.1.10";
+  const std::string DB_DATABASE_NAME= "gaStn06";
   const std::string DB_USER_NAME= "ScsStn06";
   const std::string DB_PASSWORD= "scswrapperstn06";
 
