@@ -385,15 +385,15 @@ namespace gaScsData {
 	    // Post Mockup Update: Colsolidate Layer Events are no longer needed
 	    // since consolidation is done "continuously" rather than at discrete steps.
       // eNeeded= isEventConsolidateOdd(cicm); // need to add to map if true
+      // Force false, but leave here to show logic.
 	    eNeeded = false;	// force false to eliminate the event.
       if (eNeeded) {
         // calc angle = ?
-        // TODO: Correct event angle Al Gore Rhythm?
         eventAngle= coilMap_.GetAngle(cicm);
         floatPart= modf(((eventAngle-20.0) / 40.0), &intPart);  // get the remainder of (coil angle-20) / 40
         floatPart= modf((1.0 - floatPart), &intPart);  // get remainder of 1 - previous remainder
         floatPart= 40 * floatPart;  // HS Angle
-        eventAngle= eventAngle + OFFSET_LANDED_TURN + floatPart - ANGLE_OFFSET_CE;
+        eventAngle= eventAngle + OFFSET_LANDED_TURN + floatPart + ANGLE_OFFSET_CONSOLIDATION;
         thisLayer= coilMap_.GetLayer(cicm);
         finishAngle= coilMap_.GetAngleOl14T(thisLayer);
         for ( ; eventAngle <= finishAngle; eventAngle += CONSOLIDATION_INTERVAL) { // event angle is initialized above. Loop thru range of angles and create a consolicaiton event every increment
@@ -420,7 +420,8 @@ namespace gaScsData {
       // is teach fiducial laser position event needed
       eNeeded= isEventTeachFiducial(cicm); // need to add to map if true
       if (eNeeded) {
-        // calc angle = current angle + fiducial laser event offset + offset from local zero
+        // calc angle = current angle + fiducial laser event offset + offset from local zero. Local
+        // zero offset needed because the 0U roller is at the local zero when the check is made.
         eventAngle = coilMap_.GetAngle(cicm) + OFFSET_FIDUCIAL_LASER + FIDUCIAL_LASER_EVENT_LOCAL_OFFSET;
         // add event to map
         logicTrace = "";
@@ -463,7 +464,6 @@ namespace gaScsData {
 
       // Post-Mockup Update: Make compression, turn measure, and He Measure
       // Coincident with end of layer events.
-      // is end of odd layer needed
       // Post-CSM1 Update: Make end of layer events use the now dynamic landing
       // roller offsets.  On odd layers, the landing roller will set for inner
       // turns (the 40 degree position), so use the LR inner turn offset.
@@ -555,7 +555,7 @@ namespace gaScsData {
       eNeeded= isEventHePipeInsulation(cicm); // need to add to map if true
       if (eNeeded) {
         // calc angle = current angle + 2U offset - large offset
-        eventAngle= coilMap_.GetAngle(cicm) + OFFSET_2U - ANGLE_OFFSET_LARGE;
+        eventAngle= coilMap_.GetAngle(cicm) + OFFSET_2U + ANGLE_OFFSET_HE_PIPE;
         // add event to map
         logicTrace = "";
         AddEventToMap(eventAngle, EID_HE_PIPE_INSULATION, logicTrace);
@@ -602,7 +602,7 @@ namespace gaScsData {
       eNeeded= isEventLeadEndgame(cicm); // need to add to map if true
       if (eNeeded) {
         // calc angle = current angle + landed turn offset - small offset
-        eventAngle= coilMap_.GetAngle(cicm) + OFFSET_0U - ANGLE_OFFSET_SMALL;
+        eventAngle= coilMap_.GetAngle(cicm) + OFFSET_0U + ANGLE_OFFSET_COIL_END;
         // add event to map
         logicTrace = "";
         AddEventToMap(eventAngle, EID_LONG_LEAD_ENDGAME, logicTrace);

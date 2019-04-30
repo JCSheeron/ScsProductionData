@@ -154,13 +154,15 @@ namespace gaScsData {
 
   const long OFFSET_LANDED_TURN= 960;
   
-  // const long OFFSET_FIDUCIAL_LASER= 1005;
-  const long OFFSET_FIDUCIAL_LASER= 660;
+  // const long OFFSET_FIDUCIAL_LASER= 1005; // origianl value had laser in landed pack!
+  // const long OFFSET_FIDUCIAL_LASER= 660; // azimuth 300. worked for original battery powered laser
+  const long OFFSET_FIDUCIAL_LASER= 640; // azimuth 280. New laser is 20 degree earlier.
   const long FIDUCIAL_LASER_EVENT_LOCAL_OFFSET= 65;
 
   const long ANGLE_OFFSET_SMALL= 8; // degrees. Used to move events (usually a bit earlier) than exact calc angles.
-  const long ANGLE_OFFSET_LARGE= 30;   // degrees
-  const long ANGLE_OFFSET_CE= 5;  // degree offset used in consolidation event angle calc
+  const long ANGLE_OFFSET_HE_PIPE= -30;   // degrees. Used to move He events earlier than exact calc angles.
+  const long ANGLE_OFFSET_COIL_END= -105; // degrees. Used to move the end of coil event before 0U @ winding lock.
+  const long ANGLE_OFFSET_CONSOLIDATION= -5;  // degree offset used in consolidation event angle calc
 
   const long CONSOLIDATION_INTERVAL= 120; // how often to make an odd layer consolidation event
 
