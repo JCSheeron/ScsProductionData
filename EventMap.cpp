@@ -474,6 +474,14 @@ namespace gaScsData {
       eNeeded = isEventEndOddLayer(cicm); // need to add to map if true
       if (eNeeded) {
         // calc angle = current angle + landing roller offset - joggle offset
+        // NOTE: As of pre-CSM3 and before, the value of the joggle nominal offset
+        // is 100 degrees. This puts the event earlier than it needs to be 
+        // (by about 100 -120 degrees?).  This is good, however. It stops auto wrapping early
+        // and allows the operator to incremental run to a point where the want to
+        // do the end of odd layer actions. This is helpful because sometimes a turn
+        // needs to be laid down past a hardstop before the actions are performed, but
+        // the software is not hard stop aware...So, leave the event early, and let
+        // the operator decide.
         eventAngle = coilMap_.GetAngle(cicm) + LR_INNER_TURN_OFFSET - END_LAYER_LR_JOGGLE_NOM_OFFSET;
         // add end of layer event to map
         logicTrace = "Used LR inner turn offset";
