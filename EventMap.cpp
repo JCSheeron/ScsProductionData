@@ -424,7 +424,9 @@ namespace gaScsData {
         // zero offset needed because the 0U roller is at the local zero when the check is made.
         eventAngle = coilMap_.GetAngle(cicm) + OFFSET_FIDUCIAL_LASER + FIDUCIAL_LASER_EVENT_LOCAL_OFFSET;
         // add event to map
-        logicTrace = "";
+        logicTrace = "0U at Local Zero + " +
+                     std::to_string(OFFSET_FIDUCIAL_LASER) + " + " +
+                     std::to_string(FIDUCIAL_LASER_EVENT_LOCAL_OFFSET);
         AddEventToMap(eventAngle, EID_TEACH_FIDUCIAL, logicTrace);
         } // event needed
 
@@ -609,10 +611,12 @@ namespace gaScsData {
       // is Long lead end game needed
       eNeeded= isEventLeadEndgame(cicm); // need to add to map if true
       if (eNeeded) {
-        // calc angle = current angle + landed turn offset - small offset
+        // calc angle = current angle + 0U offset + Coil end offset
         eventAngle= coilMap_.GetAngle(cicm) + OFFSET_0U + ANGLE_OFFSET_COIL_END;
         // add event to map
-        logicTrace = "";
+        logicTrace = "0U at Winding Lock + " +
+                     std::to_string(OFFSET_0U) + " + " +
+                     std::to_string(ANGLE_OFFSET_COIL_END);
         AddEventToMap(eventAngle, EID_LONG_LEAD_ENDGAME, logicTrace);
         } // event needed
 
