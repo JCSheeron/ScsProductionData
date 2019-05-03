@@ -118,13 +118,13 @@ namespace gaScsData {
   // RIA features
   // round and cast to integer types to avoid warnings
   const long OFFSET_RET_FOOT= -1 * static_cast<long>(round(abs(RET_FOOT_RIA_OFFSET_ANGLE))); // make negative
-  const long OFFSET_PLOW= -55;  // TODO: confirm
+  const long OFFSET_PLOW= -55; 
   const long OFFSET_ADV_FOOT= -1 * static_cast<long>(round(abs(ADV_FOOT_RIA_OFFSET_ANGLE))); // make negative
   const long OFFSET_0U= 0;
   const long OFFSET_2U= 160;
   const long OFFSET_AWH1= 207;
   const long OFFSET_AWH2= 247;
-  const long OFFSET_AWH3= 327;  // TODO: confirm
+  const long OFFSET_AWH3= 327;
   
   // Landing roller move events are based on the landed turn, but the coil map
   // angles are based on the CLS and 0U roller. These offsets are necessary to
@@ -154,13 +154,15 @@ namespace gaScsData {
 
   const long OFFSET_LANDED_TURN= 960;
   
-  // const long OFFSET_FIDUCIAL_LASER= 1005;
-  const long OFFSET_FIDUCIAL_LASER= 660;
-  const long FIDUCIAL_LASER_EVENT_LOCAL_OFFSET= 65;
+  // const long OFFSET_FIDUCIAL_LASER= 1005; // origianl value had laser in landed pack!
+  // const long OFFSET_FIDUCIAL_LASER= 660; // azimuth 300. worked for original battery powered laser
+  const long OFFSET_FIDUCIAL_LASER= 680; // azimuth 320. New laser is 20 degree later in the process
+  const long FIDUCIAL_LASER_EVENT_LOCAL_OFFSET= 65; // local zero used to trigger event creation. Offset from there
 
   const long ANGLE_OFFSET_SMALL= 8; // degrees. Used to move events (usually a bit earlier) than exact calc angles.
-  const long ANGLE_OFFSET_LARGE= 30;   // degrees
-  const long ANGLE_OFFSET_CE= 5;  // degree offset used in consolidation event angle calc
+  const long ANGLE_OFFSET_HE_PIPE= -30;   // degrees. Used to move He events earlier than exact calc angles.
+  const long ANGLE_OFFSET_COIL_END= -105; // degrees. Used to move the end of coil event before 0U @ winding lock.
+  const long ANGLE_OFFSET_CONSOLIDATION= -5;  // degree offset used in consolidation event angle calc
 
   const long CONSOLIDATION_INTERVAL= 120; // how often to make an odd layer consolidation event
 
