@@ -76,7 +76,8 @@ public:
                       EID_MOVE_ECHAIN = 1022,  // Move FO E-chain and increment layer
                       EID_LONG_LEAD_ENDGAME = 1023,  // long lead end game and RIA disassembly
                       EID_MOVE_LR_TO_INNER_TURN_POS = 1025, // added event not in original list
-                      EID_MOVE_LR_TO_OUTER_TURN_POS = 1026}; // added event not in original list
+                      EID_MOVE_LR_TO_OUTER_TURN_POS = 1026, // added event not in original list
+                      EID_REMOVE_INNER_STRUTS = 1027}; // added event not in original list
 
      // constants
 
@@ -108,6 +109,7 @@ public:
       bool isEventLayerCompression(CoilMap::cm_cit cit) const;
       bool isEventTurnMeasurement(CoilMap::cm_cit cit) const;
       bool isEventMoveEChain(CoilMap::cm_cit cit) const;
+      bool isEventRemoveInnerStruts(CoilMap::cm_cit cit) const;
       bool isEventLeadEndgame(CoilMap::cm_cit cit) const;
       bool isEventMoveLrInnerTurnPos(CoilMap::cm_cit cit) const;
       bool isEventMoveLrToOuterTurnPos(CoilMap::cm_cit cit) const;

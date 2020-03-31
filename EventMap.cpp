@@ -264,10 +264,18 @@ namespace gaScsData {
   bool EventMap::isEventMoveEChain(CoilMap::cm_cit cit) const {
     CoilMap::fc_pair fcPair= coilMap_.GetCurrentNextFc(cit); // get current and next feature code
     long layerCheck= coilMap_.GetLayer(cit); // get layer
-    // Joggle, but not the last joggle of the hex, and the last layer (end of the coil)
-    // true if FC(current row) = J, FC(next row) <> L and Layer <> next to last (39)
-    return FC_JOGGLE == fcPair.first && FC_LOCAL != fcPair.second && LAYERS_PER_COIL - 1 == layerCheck;
+    // Joggle, but not the last joggle of the hex, and on Layer 37 (layers per coil - 3)
+    // true if FC(current row) = J, FC(next row) <> L and Layer = 37
+    return FC_JOGGLE == fcPair.first && FC_LOCAL != fcPair.second && LAYERS_PER_COIL - 3 == layerCheck;
     } // EventMap::isEventMoveEChain(CoilMap::cm_cit cit)
+
+  bool EventMap::isEventRemoveInnerStruts(CoilMap::cm_cit cit) const {
+    CoilMap::fc_pair fcPair= coilMap_.GetCurrentNextFc(cit); // get current and next feature code
+    long layerCheck= coilMap_.GetLayer(cit); // get layer
+    // Joggle, but not the last joggle of the hex, and on Layer 38 (layers per coil - 2)
+    // true if FC(current row) = J, FC(next row) <> L and Layer = 38
+    return FC_JOGGLE == fcPair.first && FC_LOCAL != fcPair.second && LAYERS_PER_COIL - 2 == layerCheck;
+    } // EventMap::isEventRemoveInnerStruts(CoilMap::cm_cit cit)
 
   bool EventMap::isEventLeadEndgame(CoilMap::cm_cit cit) const {
     bool fcW = (FC_WINDING_LOCK == coilMap_.GetFc(cit) ? true : false); // is winding lock
@@ -606,6 +614,16 @@ namespace gaScsData {
         // add event to map
         logicTrace = "";
         AddEventToMap(eventAngle, EID_MOVE_ECHAIN, logicTrace);
+        } // event needed
+
+      // is Move Energy Chain needed
+      eNeeded= isEventRemoveInnerStruts(cicm); // need to add to map if true
+      if (eNeeded) {
+        // calc angle = current angle + landed turn offset - small offset
+        eventAngle= coilMap_.GetAngle(cicm) + OFFSET_0U;
+        // add event to map
+        logicTrace = "";
+        AddEventToMap(eventAngle, EID_REMOVE_INNER_STRUTS, logicTrace);
         } // event needed
 
       // is Long lead end game needed
