@@ -215,6 +215,7 @@ namespace gaScsData {
   const std::string SAP_ISLASTLAYER_PARAM= "isLastLayer";
   const std::string SAP_HQPADJ_PARAM = "hqpAdj";
   const std::string SAP_LAYERADJ_PARAM = "layerAdj";
+  const std::string SAP_LAYERNUM_PARAM = "cmLbLayer";
   const std::string SAP_FTAIN_PARAM= "footAInPosDist";
   const std::string SAP_FTAOUT_PARAM= "footAOutPosDist";
   const std::string SAP_FTBIN_PARAM= "footBInPosDist";

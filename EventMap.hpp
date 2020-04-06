@@ -1,4 +1,4 @@
-/********************************************************************
+p********************************************************************
  * COPYRIGHT -- General Atomics
  ********************************************************************
  * Library: 
@@ -40,11 +40,17 @@ public:
       typedef EventMapTyp::const_iterator em_const_iter;
 
       // Define a set to contain a list of angles.
+      // PostCSM4: This set used to be a simple set of angles,
+      // but a change was made to make it a set of <layer, angle> pairs. This 
+      // is so the layer number can be acted upon when creating the events.
+      // This change was needed to properly deal with the 1022 FO E-Chain event and 
+      // the new 1027 inner strut removal event.
       // Use a flat_set here becuase the size is fixed (set it in the ctor),
       // and to optimize lookups. Google research shows insert performance over map is better (surprisingly) under about 256 elements.
       // Each usage is expected to contain 40 or less elements
-      typedef boost::container::flat_set<double> angleSetTyp;  // for best performance, reserve size in ctor
-      typedef angleSetTyp::const_iterator as_cit;
+      typedef std::pair<long, double> LayerAngleTyp;
+      typedef boost::container::flat_set<LayerAngleTyp> layerAngleSetTyp;  // for best performance, reserve size in ctor
+      typedef layerAngleSetTyp::const_iterator as_cit;
  
       // The event ids need to match the event class table in the database.
       // This code does not generate instances of all these event ids.
@@ -53,7 +59,7 @@ public:
       enum EventIds { EID_USER_STOP = 1000,
                       EID_ALARM_STOP = 1001,
                       EID_CAL_TOOL = 1002,
-                      EID_INSTALL_COIL = 1003,
+                      EID_INSTALL_COIL = 1003,:
                       EID_LOAD_FIRST_HEX = 1004,
                       EID_INSTALL_RIA_AWH = 1005,
                       EID_INSPECT_BURRS = 1006,
@@ -150,10 +156,10 @@ public:
       CoilMap coilMap_;
 
       // angle set of the hqp start angles (from the Scs Positon Table)
-      angleSetTyp hqpStartSet_;
+      layerAngleSetTyp hqpStartSet_;
 
       // angle set of the layer start angles (from the Scs Positon Table)
-      angleSetTyp layerStartSet_;
+      layerAngleSetTyp layerStartSet_;
 
         // Event map
       EventMapTyp eventMap_;

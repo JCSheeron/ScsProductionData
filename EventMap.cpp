@@ -350,9 +350,25 @@ namespace gaScsData {
     // Layer Increment Event
     std::cout << "Create Layer Increment Events." << std::endl;
     for (ascit = layerStartSet_.begin(); ascit != layerStartSet_.end(); ++ascit) {
-      // for each angle in the set, add event to map
-      logicTrace = "Angle is from Scs Pos Table where isNewLayer is set.";
-      AddEventToMap(*ascit, EID_LAYER_INCREMENT, logicTrace);
+      // For each angle in the set, add event to map.
+      // Most layers are nominal layer increment events EID_LAYER_INCREMENT,
+      // but layer 37 is a move FO E-Chain layer (EID_MOVE_ECHAIN), and layer
+      // 38 is a remove inner struts layer (EID_REMOVE_INNER_STRUTS).
+      if (37 == *ascit.first) {
+        // layer 37, e-chain event
+        logicTrace = "Angle is from Scs Pos Table where isNewLayer is set for layer 37.";
+        AddEventToMap(*ascit.second, EID_MOVE_ECHAIN, logicTrace);
+        }
+      else if (38 == *ascit.first) {
+        // layer 38, remove inner struts
+        logicTrace = "Angle is from Scs Pos Table where isNewLayer is set.";
+        AddEventToMap(*ascit.second, EID_REMOVE_INNER_STRUTS, logicTrace);
+        }
+      else {
+        // nominal layer
+        logicTrace = "Angle is from Scs Pos Table where isNewLayer is set.";
+        AddEventToMap(*ascit.second, EID_LAYER_INCREMENT, logicTrace);
+        }
       }
 
     // variables to deal with displaying progress
@@ -607,7 +623,13 @@ namespace gaScsData {
         } // event needed
 
       // is Move Energy Chain needed
-      eNeeded= isEventMoveEChain(cicm); // need to add to map if true
+      // Post CSM4 Change: This is now done up above with the increment layer events.
+      // Prior to this change, the event was being put too late (offset calc
+      // from 0U was wrong) , when in actuality, it should be coincident
+      // with a layer increment.
+			// Logic left here for info purposes only.
+      // 1eNeeded= isEventMoveEChain(cicm); // need to add to map if true
+			eNeeded = false;
       if (eNeeded) {
         // calc angle = current angle + landed turn offset - small offset
         eventAngle= coilMap_.GetAngle(cicm) + OFFSET_0U;
@@ -617,7 +639,13 @@ namespace gaScsData {
         } // event needed
 
       // is Move Energy Chain needed
-      eNeeded= isEventRemoveInnerStruts(cicm); // need to add to map if true
+      // Post CSM4 Change: This event was added after CSM 4, but like the Move E-Chain
+      // event, it is now done up above with the increment layer events.
+      // Otherwise the event would be put too late (offset calc from 0U was wrong,
+      // when in actuality, it should be coincident with a layer increment.
+			// Logic left here for info purposes only.
+      // eNeeded= isEventRemoveInnerStruts(cicm); // need to add to map if true
+			eNeeded = false;
       if (eNeeded) {
         // calc angle = current angle + landed turn offset - small offset
         eventAngle= coilMap_.GetAngle(cicm) + OFFSET_0U;
@@ -712,7 +740,7 @@ namespace gaScsData {
   long EventMap::QueryDb(const std::string &sprocName) {
     // return value indicates success or error
 
-    // query the db using teh specified stored procedure, 
+    // query the db using the specified stored procedure, 
     // presumably a SELECT command to fetch data
 
     // variable to hold return value
@@ -755,12 +783,13 @@ namespace gaScsData {
     try {
       if (dbCommand_.isResultSet()) {
         // if there is a result set
-        // create local variables for the angle
+        LayerAngleTyp laTyp; // local variables for the <layer, angle> pair
         while (dbCommand_.FetchNext()) {
-          // get angle
-          // add the angle to the set
+          // add the layer and associated angle to the map
           // use the end of the set as the insertion hint for optimum performance
-          hqpStartSet_.insert(hqpStartSet_.end(), dbCommand_.Field(SAP_RIAANGLE_PARAM.c_str()).asDouble());  // insert the retreived angle into the set
+          laTyp.first = dbCommand_.Field(SAP_LAYERNUM_PARAM.c_str()).asLong();    // layer
+          laTyp.second = dbCommand_.Field(SAP_RIAANGLE_PARAM.c_str()).asDouble();  // angle
+          hqpStartSet_.insert(layerStartSet_.end(), laTyp);  // insert the retreived angle into the set
         }
         // set return value for all okay
         rtnValue = RTN_NO_ERROR;
@@ -798,12 +827,13 @@ namespace gaScsData {
     try {
       if (dbCommand_.isResultSet()) {
         // if there is a result set
-        // create local variables for the angle
+        LayerAngleTyp laTyp; // local variables for the <layer, angle> pair
         while (dbCommand_.FetchNext()) {
-          // get angle
           // add the layer and associated angle to the map
           // use the end of the set as the insertion hint for optimum performance
-          layerStartSet_.insert(layerStartSet_.end(), dbCommand_.Field(SAP_RIAANGLE_PARAM.c_str()).asDouble());  // insert the retreived angle into the set
+          laTyp.first = dbCommand_.Field(SAP_LAYERNUM_PARAM.c_str()).asLong();    // layer
+          laTyp.second = dbCommand_.Field(SAP_RIAANGLE_PARAM.c_str()).asDouble();  // angle
+          layerStartSet_.insert(layerStartSet_.end(), laTyp);  // insert the retreived angle into the set
         }
         // set return value for all okay
         rtnValue = RTN_NO_ERROR;
@@ -907,13 +937,6 @@ namespace gaScsData {
 
     try {
       // Set the command text of the command object
-      dbCommand_.setCommandText(SPNAME_DELETE_ALL_INC_EVENTS.c_str(), SA_CmdStoredProc);
-
-      // there are no input parameters
-
-      // execute the command
-      dbCommand_.Execute();
-      // set return value for all okay
       rtnValue= RTN_NO_ERROR;
     }
     catch (SAException &ex) {
