@@ -1,4 +1,4 @@
-p********************************************************************
+/********************************************************************
  * COPYRIGHT -- General Atomics
  ********************************************************************
  * Library: 
@@ -59,7 +59,7 @@ public:
       enum EventIds { EID_USER_STOP = 1000,
                       EID_ALARM_STOP = 1001,
                       EID_CAL_TOOL = 1002,
-                      EID_INSTALL_COIL = 1003,:
+                      EID_INSTALL_COIL = 1003,
                       EID_LOAD_FIRST_HEX = 1004,
                       EID_INSTALL_RIA_AWH = 1005,
                       EID_INSPECT_BURRS = 1006,

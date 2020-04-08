@@ -344,30 +344,33 @@ namespace gaScsData {
     for (ascit = hqpStartSet_.begin(); ascit != hqpStartSet_.end(); ++ascit) {
       // for each angle in the set, add event to map
       logicTrace = "Angle is from Scs Pos Table where isNewHqp is set.";
-      AddEventToMap(*ascit, EID_HQP_LOAD, logicTrace);
+      AddEventToMap(ascit->second, EID_HQP_LOAD, logicTrace);
       }
 
     // Layer Increment Event
+    // Post CSM4 Update: Nominal Layer increment were always done here. Now e-chain and struts
+    // are added here as well. These used to be done below, but then there were two increment events,
+    // and moving all the logic here was cleaner and easier to implement.
     std::cout << "Create Layer Increment Events." << std::endl;
     for (ascit = layerStartSet_.begin(); ascit != layerStartSet_.end(); ++ascit) {
       // For each angle in the set, add event to map.
       // Most layers are nominal layer increment events EID_LAYER_INCREMENT,
       // but layer 37 is a move FO E-Chain layer (EID_MOVE_ECHAIN), and layer
       // 38 is a remove inner struts layer (EID_REMOVE_INNER_STRUTS).
-      if (37 == *ascit.first) {
+      if (37 == (ascit->first)) {
         // layer 37, e-chain event
         logicTrace = "Angle is from Scs Pos Table where isNewLayer is set for layer 37.";
-        AddEventToMap(*ascit.second, EID_MOVE_ECHAIN, logicTrace);
+        AddEventToMap(ascit->second, EID_MOVE_ECHAIN, logicTrace);
         }
-      else if (38 == *ascit.first) {
+      else if (38 == (ascit->first)) {
         // layer 38, remove inner struts
-        logicTrace = "Angle is from Scs Pos Table where isNewLayer is set.";
-        AddEventToMap(*ascit.second, EID_REMOVE_INNER_STRUTS, logicTrace);
+        logicTrace = "Angle is from Scs Pos Table where isNewLayer is set for layer 38.";
+        AddEventToMap(ascit->second, EID_REMOVE_INNER_STRUTS, logicTrace);
         }
       else {
         // nominal layer
         logicTrace = "Angle is from Scs Pos Table where isNewLayer is set.";
-        AddEventToMap(*ascit.second, EID_LAYER_INCREMENT, logicTrace);
+        AddEventToMap(ascit->second, EID_LAYER_INCREMENT, logicTrace);
         }
       }
 
@@ -789,7 +792,7 @@ namespace gaScsData {
           // use the end of the set as the insertion hint for optimum performance
           laTyp.first = dbCommand_.Field(SAP_LAYERNUM_PARAM.c_str()).asLong();    // layer
           laTyp.second = dbCommand_.Field(SAP_RIAANGLE_PARAM.c_str()).asDouble();  // angle
-          hqpStartSet_.insert(layerStartSet_.end(), laTyp);  // insert the retreived angle into the set
+          hqpStartSet_.insert(hqpStartSet_.end(), laTyp);  // insert the retreived angle into the set
         }
         // set return value for all okay
         rtnValue = RTN_NO_ERROR;
